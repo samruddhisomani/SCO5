@@ -4,9 +4,12 @@ U=V
 
 #boundary conditions
 
-V[99,99,0]=(5/6) #when we're both at 99, whoever's turn it is will win as long as they don't roll a 1.
-V[98,99,0]=(5/6) #when I'm at 98, I'll win as long as I don't roll a 1
-V[99,98,0]=(5/6) #when they're at 98, I'll win as long as I don't a 1 
+V[99,99,0]=1 #when we're both at 99, i'm gonna win
+V[98,99,0]=5/6 #when I'm at 98, I'll win as long as I don't roll a 1
+V[99,98,0]=1 #when they're at 98, i'm gonna win regardless
+V[99,99,2:6]=1
+
+options(expressions=500000)
 
 V[m,y,k]=max(1-V[y,m+k,0],
              (1/6)*
@@ -18,25 +21,36 @@ V[m,y,k]=max(1-V[y,m+k,0],
                   V[m,y,k+6]))
 
 rS=function(m,y,k){ 
-  if (!anyNA(V[m,y,k])){ #if there it already exists
-    return(V[m,y,k])
+  if (!anyNA(V[m+1,y+1,k+1])){ #if there it already exists
+    return(V[m+1,y+1,k+1])
   } else { #if it doesn't, compute it
     answer = max(1-rS(y,m+k,0),
                  (1/6)*
-                   (1-rS(y,m,0)+
+                   (1-rS(y,m+1,0)+
                       rS(m,y,k+2)+
                       rS(m,y,k+3)+
                       rS(m,y,k+4)+
                       rS(m,y,k+5)+
                       rS(m,y,k+6))) 
+    V[m+1,y+1,k+1]=answer
     return(answer)
   } 
 }
 
 gameStrategy=function(goal){
-  V=array(NA,dim=c(goal-1,goal-1,goal+5)) 
+  V=array(NA,dim=c(goal,goal,goal+6)) 
   U=V
-  V[goal-1,goal-1,0]=5/6
-  V[goal-2,goal-1,0]=5/6
-  V[goal-1,goal-2,0]=5/6  
+  V[goal-1+1,goal-1+1,0+1]=1
+  V[goal-2+1,goal-1+1,0+1]=5/6
+  V[goal-1+1,goal-2+1,0+1]=1  
+  #V[goal-1+1,goal-1+1,3:7]=1
+  for (i in 0:goal-1){
+    V[(i+1),,(goal-i+1):(goal+5+1)]=1 # I win as soon as I hit 100-i
+    for (j in 0:(goal-1)){
+      for (k in 0:(goal-i-1))
+        rS(i,j,k)
+    }
+  }
 }
+
+gameStrategy(2)
