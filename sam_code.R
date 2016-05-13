@@ -44,13 +44,23 @@ gameStrategy=function(goal){
   V[goal-2+1,goal-1+1,0+1]=5/6
   V[goal-1+1,goal-2+1,0+1]=1  
   #V[goal-1+1,goal-1+1,3:7]=1
-  for (i in 0:goal-1){
-    V[(i+1),,(goal-i+1):(goal+5+1)]=1 # I win as soon as I hit 100-i
-    for (j in 0:(goal-1)){
-      for (k in 0:(goal-i-1))
-        rS(i,j,k)
+  for (m in (goal-1):0){
+    V[(m+1),,(goal-m+1):(goal+5+1)]=1 # I win as soon as I hit 100-i
+    for (y in (goal-1):0){
+      for (k in (goal-m-1):0){
+        V[m+1,y+1,k+1]=max(1-V[y+1,m+k+1,1],
+                           (1/6)*
+                             (1-V[y+1,m+1,0+1]+
+                                V[m+1,y+1,k+2+1]+
+                                V[m+1,y+1,k+3+1]+
+                                V[m+1,y+1,k+4+1]+
+                                V[m+1,y+1,k+5+1]+
+                                V[m+1,y+1,k+6+1]))
+      }
+        
     }
+    return (V)
   }
 }
 
-gameStrategy(2)
+gameStrategy(4)
